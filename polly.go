@@ -46,14 +46,25 @@ func InfluxAsyncGet(writeAPI *api.WriteAPI, wcIP string) {
 	client.WritePoint(p)
 }
 
+// getEnv get key environment variable if exist otherwise return defalutValue
+func getEnv(key, defaultValue string) string {
+    value := os.Getenv(key)
+    if len(value) == 0 {
+        return defaultValue
+    }
+    return value
+}
 // Execute simply runs the totality of polly in your program. It is
 // recommended you run this as a goroutine so your program can do
 // other things.
 func Execute() {
 	hpwcIP := os.Getenv("HPWC_IP")
-	influxIP := os.Getenv("INFLUX_IP")
-	client := influxdb2.NewClientWithOptions(fmt.Sprintf("http://%s:8086",influxIP), "my-token", influxdb2.DefaultOptions().SetBatchSize(20))
-	writeAPI := client.WriteAPI("admin", "admin123")
+	influxIP := Getenv("INFLUX_IP",'localhost')
+	influxUSER := Getenv("INFLUX_USER",'admin')
+	influxPASSWORD := Getenv("INFLUX_PASSWORD",'admin123')
+	influxTOKEN := Getenv("INFLUX_TOKEN",'my-token')
+	client := influxdb2.NewClientWithOptions(fmt.Sprintf("http://%s:8086",influxIP), influxTOKEN, influxdb2.DefaultOptions().SetBatchSize(20))
+	writeAPI := client.WriteAPI(influxUSER, influxPASSWORD)
 
 	// The way this is set up, these likely don't get executed on ^C.
 	defer client.Close()
